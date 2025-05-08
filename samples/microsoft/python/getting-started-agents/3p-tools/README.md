@@ -1,4 +1,4 @@
-# Connect with non-Microsoft tools in Azure AI Agent Service
+# Connect with non-Microsoft tools in Azure AI Agent Services
 
 ## Overview
 To empower your AI agent with grounded data or the capability to take actions and automating workflows, the Foundry Agent service provides a wide range of built-in tools, such as Grounding with Bing Search, Azure AI Search, Azure Logic Apps, as well as third-party parter tools, such as Tripadvisor. This page is designed to provide an overview of tools provided in the AI Agent Service.
