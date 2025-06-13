@@ -50,7 +50,20 @@ param projectDescription string = 'A project for the AI Foundry account with net
 @description('The display name of the project')
 param displayName string = 'project'
 
+// Existing Virtual Network parameters
+@description('Virtual Network name for the Agent to create new or existing virtual network')
+param vnetName string = ''
+
+@description('The name of Agents Subnet to create new or existing subnet for agents')
+param agentSubnetName string = 'agent-subnet'
+
+@description('The name of Private Endpoint subnet to create new or existing subnet for private endpoints')
+param peSubnetName string = 'pe-subnet'
+
 //Existing standard Agent required resources
+@description('Existing Virtual Network name Resource ID')
+param existingVnetResourceId string = ''
+
 @description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchResourceId string = ''
 @description('The AI Storage Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
@@ -67,6 +80,8 @@ var azureStorageName = toLower('${aiServices}${uniqueSuffix}storage')
 var storagePassedIn = azureStorageAccountResourceId != ''
 var searchPassedIn = aiSearchResourceId != ''
 var cosmosPassedIn = azureCosmosDBAccountResourceId != ''
+var existingVnetPassedIn = existingVnetResourceId != ''
+
 
 var acsParts = split(aiSearchResourceId, '/')
 var aiSearchServiceSubscriptionId = searchPassedIn ? acsParts[2] : subscription().subscriptionId
@@ -80,16 +95,26 @@ var storageParts = split(azureStorageAccountResourceId, '/')
 var azureStorageSubscriptionId = storagePassedIn ? storageParts[2] : subscription().subscriptionId
 var azureStorageResourceGroupName = storagePassedIn ? storageParts[4] : resourceGroup().name
 
+var vnetParts = split(existingVnetResourceId, '/')
+var vnetResourceGroupName = existingVnetPassedIn ? vnetParts[4] : resourceGroup().name
+var existingVnetName = existingVnetPassedIn ? last(vnetParts) : vnetName
+var trimVnetName = trim(existingVnetName)
+
 @description('The name of the project capability host to be created')
 param projectCapHost string = 'caphostproj'
 
 // Create Virtual Network and Subnets
-module vnet 'modules-network-secured/vnet.bicep' = {
-    name: '${uniqueSuffix}-vnet'
-    params: {
-      location: location
-    }
+module vnet 'modules-network-secured/network-agent-vnet.bicep' = {
+  name: 'vnet-${trimVnetName}-${uniqueSuffix}-deployment'
+  params: {
+    location: location
+    vnetName: trimVnetName
+    useExistingVnet: existingVnetPassedIn
+    existingVnetResourceGroupName: vnetResourceGroupName
+    agentSubnetName: agentSubnetName
+    peSubnetName: peSubnetName
   }
+}
 
 /*
   Create the AI Services account and gpt-4o model deployment
@@ -190,6 +215,7 @@ module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.b
       vnetName: vnet.outputs.virtualNetworkName    // VNet containing subnets
       peSubnetName: vnet.outputs.peSubnetName        // Subnet for private endpoints
       suffix: uniqueSuffix                                    // Unique identifier
+      vnetResourceGroupName: vnet.outputs.virtualNetworkResourceGroup
     }
   }
 
@@ -266,7 +292,7 @@ module storageContainersRoleAssignment 'modules-network-secured/blob-storage-con
   ]
 }
 
-// The Cosmos DB Operator role must be assigned after the caphost is created
+// The Cosmos Built-In Data Contributor role must be assigned after the caphost is created
 module cosmosContainerRoleAssignments 'modules-network-secured/cosmos-container-role-assignments.bicep' = {
   name: 'cosmos-ra-${uniqueSuffix}-deployment'
   scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
@@ -280,4 +306,3 @@ dependsOn: [
   addProjectCapabilityHost, storageContainersRoleAssignment
   ]
 }
-
