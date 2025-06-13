@@ -16,6 +16,7 @@ param resourceGroupLocation string = resourceGroup().location
     'uksouth'
     'westus'
     'westus3'
+    'westus2'
   ])
 @description('Location for all resources.')
 param location string = resourceGroupLocation
