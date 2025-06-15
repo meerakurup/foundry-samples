@@ -246,10 +246,6 @@ module cosmosAccountRoleAssignments 'modules-network-secured/cosmosdb-account-ro
     cosmosDBName: aiDependencies.outputs.cosmosDBName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
-  dependsOn: [
-    storageAccountRoleAssignment
-  ]
-
 }
 
 // This role can be assigned before or after the caphost is created
@@ -260,9 +256,6 @@ module aiSearchRoleAssignments 'modules-network-secured/ai-search-role-assignmen
     aiSearchName: aiDependencies.outputs.aiSearchName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
-  dependsOn:[
-    cosmosAccountRoleAssignments, storageAccountRoleAssignment
-  ]
 }
 
 // This module creates the capability host for the project and account
@@ -276,6 +269,9 @@ module addProjectCapabilityHost 'modules-network-secured/add-project-capability-
     aiSearchConnection: aiProject.outputs.aiSearchConnection
     projectCapHost: projectCapHost
   }
+  dependsOn: [
+    storageAccountRoleAssignment,cosmosAccountRoleAssignments, aiSearchRoleAssignments, privateEndpointAndDNS
+  ]
 }
 
 // The Storage Blob Data Owner role must be assigned after the caphost is created
