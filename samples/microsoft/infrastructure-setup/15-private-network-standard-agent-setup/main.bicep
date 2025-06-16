@@ -171,6 +171,47 @@ module aiDependencies 'modules-network-secured/standard-dependent-resources.bice
     }
 }
 
+resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' existing = {
+  name: aiDependencies.outputs.azureStorageName
+  scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
+}
+
+
+resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' existing = {
+  name: aiDependencies.outputs.aiSearchName
+  scope: resourceGroup(aiDependencies.outputs.aiSearchServiceSubscriptionId, aiDependencies.outputs.aiSearchServiceResourceGroupName)
+}
+
+resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' existing = {
+  name: aiDependencies.outputs.cosmosDBName
+  scope: resourceGroup(cosmosDBSubscriptionId, cosmosDBResourceGroupName)
+}
+
+// Private Endpoint and DNS Configuration
+// This module sets up private network access for all Azure services:
+// 1. Creates private endpoints in the specified subnet
+// 2. Sets up private DNS zones for each service
+// 3. Links private DNS zones to the VNet for name resolution
+// 4. Configures network policies to restrict access to private endpoints only
+module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.bicep' = {
+    name: '${uniqueSuffix}-private-endpoint'
+    params: {
+      aiAccountName: aiAccount.outputs.accountName    // AI Services to secure
+      aiSearchName: aiDependencies.outputs.aiSearchName       // AI Search to secure
+      storageName: aiDependencies.outputs.azureStorageName        // Storage to secure
+      cosmosDBName:aiDependencies.outputs.cosmosDBName
+      vnetName: vnet.outputs.virtualNetworkName    // VNet containing subnets
+      peSubnetName: vnet.outputs.peSubnetName        // Subnet for private endpoints
+      suffix: uniqueSuffix                                    // Unique identifier
+      vnetResourceGroupName: vnet.outputs.virtualNetworkResourceGroup
+    }
+    dependsOn: [
+    aiSearch      // Ensure AI Search exists
+    storage       // Ensure Storage exists
+    cosmosDB      // Ensure Cosmos DB exists
+  ]
+  }
+
 /*
   Creates a new project (sub-resource of the AI Services account)
 */
@@ -197,27 +238,13 @@ module aiProject 'modules-network-secured/ai-project-identity.bicep' = {
     // dependent resources
     accountName: aiAccount.outputs.accountName
   }
+  dependsOn: [
+     privateEndpointAndDNS
+     cosmosDB
+     aiSearch
+     storage
+  ]
 }
-
-// Private Endpoint and DNS Configuration
-// This module sets up private network access for all Azure services:
-// 1. Creates private endpoints in the specified subnet
-// 2. Sets up private DNS zones for each service
-// 3. Links private DNS zones to the VNet for name resolution
-// 4. Configures network policies to restrict access to private endpoints only
-module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.bicep' = {
-    name: '${uniqueSuffix}-private-endpoint'
-    params: {
-      aiAccountName: aiAccount.outputs.accountName    // AI Services to secure
-      aiSearchName: aiDependencies.outputs.aiSearchName       // AI Search to secure
-      storageName: aiDependencies.outputs.azureStorageName        // Storage to secure
-      cosmosDBName:aiDependencies.outputs.cosmosDBName
-      vnetName: vnet.outputs.virtualNetworkName    // VNet containing subnets
-      peSubnetName: vnet.outputs.peSubnetName        // Subnet for private endpoints
-      suffix: uniqueSuffix                                    // Unique identifier
-      vnetResourceGroupName: vnet.outputs.virtualNetworkResourceGroup
-    }
-  }
 
 module formatProjectWorkspaceId 'modules-network-secured/format-project-workspace-id.bicep' = {
   name: 'format-project-workspace-id-${uniqueSuffix}-deployment'
@@ -270,7 +297,7 @@ module addProjectCapabilityHost 'modules-network-secured/add-project-capability-
     projectCapHost: projectCapHost
   }
   dependsOn: [
-    storageAccountRoleAssignment,cosmosAccountRoleAssignments, aiSearchRoleAssignments, privateEndpointAndDNS
+    storageAccountRoleAssignment,cosmosAccountRoleAssignments, aiSearchRoleAssignments
   ]
 }
 
