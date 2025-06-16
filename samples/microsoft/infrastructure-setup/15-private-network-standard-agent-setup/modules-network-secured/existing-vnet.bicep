@@ -17,6 +17,9 @@ This module works with existing virtual networks and required subnets.
 @description('The name of the existing virtual network')
 param vnetName string
 
+@description('Subscription ID of virtual network (if different from current subscription)')
+param vnetSubscriptionId string = subscription().subscriptionId
+
 @description('Resource Group name of the existing VNet (if different from current resource group)')
 param vnetResourceGroupName string = resourceGroup().name
 
@@ -83,3 +86,4 @@ output peSubnetId string = '${existingVNet.id}/subnets/${peSubnetName}'
 output virtualNetworkName string = existingVNet.name
 output virtualNetworkId string = existingVNet.id
 output virtualNetworkResourceGroup string = vnetResourceGroupName
+output virtualNetworkSubscriptionId string = vnetSubscriptionId

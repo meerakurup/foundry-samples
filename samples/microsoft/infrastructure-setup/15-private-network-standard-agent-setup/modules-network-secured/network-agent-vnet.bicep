@@ -7,6 +7,9 @@ param vnetName string
 @description('Indicates if an existing VNet should be used')
 param useExistingVnet bool = false
 
+@description('Subscription ID of the existing VNet (if different from current subscription)')
+param existingVnetSubscriptionId string = subscription().subscriptionId
+
 @description('Resource Group name of the existing VNet (if different from current resource group)')
 param existingVnetResourceGroupName string = resourceGroup().name
 
@@ -51,6 +54,7 @@ module existingVNet 'existing-vnet.bicep' = if (useExistingVnet) {
   params: {
     vnetName: vnetName
     vnetResourceGroupName: existingVnetResourceGroupName
+    vnetSubscriptionId: existingVnetSubscriptionId
     agentSubnetName: agentSubnetName
     peSubnetName: peSubnetName
     createAgentSubnet: createAgentSubnet
@@ -63,6 +67,7 @@ module existingVNet 'existing-vnet.bicep' = if (useExistingVnet) {
 // Provide unified outputs regardless of which module was used
 output virtualNetworkName string = useExistingVnet ? existingVNet.outputs.virtualNetworkName : newVNet.outputs.virtualNetworkName
 output virtualNetworkId string = useExistingVnet ? existingVNet.outputs.virtualNetworkId : newVNet.outputs.virtualNetworkId
+output virtualNetworkSubscriptionId string = useExistingVnet ? existingVNet.outputs.virtualNetworkSubscriptionId : newVNet.outputs.virtualNetworkSubscriptionId
 output virtualNetworkResourceGroup string = useExistingVnet ? existingVNet.outputs.virtualNetworkResourceGroup : newVNet.outputs.virtualNetworkResourceGroup
 output agentSubnetName string = agentSubnetName
 output peSubnetName string = peSubnetName

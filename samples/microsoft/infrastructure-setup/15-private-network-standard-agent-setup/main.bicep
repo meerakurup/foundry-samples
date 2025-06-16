@@ -52,7 +52,7 @@ param displayName string = 'project'
 
 // Existing Virtual Network parameters
 @description('Virtual Network name for the Agent to create new or existing virtual network')
-param vnetName string = ''
+param vnetName string = 'agent-vnet-test'
 
 @description('The name of Agents Subnet to create new or existing subnet for agents')
 param agentSubnetName string = 'agent-subnet'
@@ -63,6 +63,15 @@ param peSubnetName string = 'pe-subnet'
 //Existing standard Agent required resources
 @description('Existing Virtual Network name Resource ID')
 param existingVnetResourceId string = ''
+
+@description('Address space for the VNet (only used for new VNet)')
+param vnetAddressPrefix string = '192.168.0.0/16'
+
+@description('Address prefix for the agent subnet')
+param agentSubnetPrefix string = '192.168.0.0/24'
+
+@description('Address prefix for the private endpoint subnet')
+param peSubnetPrefix string = '192.168.1.0/24'
 
 @description('The AI Search Service full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param aiSearchResourceId string = ''
@@ -96,6 +105,7 @@ var azureStorageSubscriptionId = storagePassedIn ? storageParts[2] : subscriptio
 var azureStorageResourceGroupName = storagePassedIn ? storageParts[4] : resourceGroup().name
 
 var vnetParts = split(existingVnetResourceId, '/')
+var vnetSubscriptionId = existingVnetPassedIn ? vnetParts[2] : subscription().subscriptionId
 var vnetResourceGroupName = existingVnetPassedIn ? vnetParts[4] : resourceGroup().name
 var existingVnetName = existingVnetPassedIn ? last(vnetParts) : vnetName
 var trimVnetName = trim(existingVnetName)
@@ -113,6 +123,10 @@ module vnet 'modules-network-secured/network-agent-vnet.bicep' = {
     existingVnetResourceGroupName: vnetResourceGroupName
     agentSubnetName: agentSubnetName
     peSubnetName: peSubnetName
+    vnetAddressPrefix: vnetAddressPrefix
+    agentSubnetPrefix: agentSubnetPrefix
+    peSubnetPrefix: peSubnetPrefix
+    existingVnetSubscriptionId: vnetSubscriptionId
   }
 }
 
@@ -204,6 +218,7 @@ module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.b
       peSubnetName: vnet.outputs.peSubnetName        // Subnet for private endpoints
       suffix: uniqueSuffix                                    // Unique identifier
       vnetResourceGroupName: vnet.outputs.virtualNetworkResourceGroup
+      vnetSubscriptionId: vnet.outputs.virtualNetworkSubscriptionId // Subscription ID for the VNet
     }
     dependsOn: [
     aiSearch      // Ensure AI Search exists
