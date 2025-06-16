@@ -263,6 +263,10 @@ module storageAccountRoleAssignment 'modules-network-secured/azure-storage-accou
     azureStorageName: aiDependencies.outputs.azureStorageName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
+  dependsOn: [
+   storage
+   privateEndpointAndDNS
+  ]
 }
 
 // The Comos DB Operator role must be assigned before the caphost is created
@@ -273,6 +277,10 @@ module cosmosAccountRoleAssignments 'modules-network-secured/cosmosdb-account-ro
     cosmosDBName: aiDependencies.outputs.cosmosDBName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
+  dependsOn: [
+    cosmosDB
+    privateEndpointAndDNS
+  ]
 }
 
 // This role can be assigned before or after the caphost is created
@@ -283,6 +291,10 @@ module aiSearchRoleAssignments 'modules-network-secured/ai-search-role-assignmen
     aiSearchName: aiDependencies.outputs.aiSearchName
     projectPrincipalId: aiProject.outputs.projectPrincipalId
   }
+  dependsOn: [
+    aiSearch
+    privateEndpointAndDNS
+  ]
 }
 
 // This module creates the capability host for the project and account
@@ -297,7 +309,13 @@ module addProjectCapabilityHost 'modules-network-secured/add-project-capability-
     projectCapHost: projectCapHost
   }
   dependsOn: [
-    storageAccountRoleAssignment,cosmosAccountRoleAssignments, aiSearchRoleAssignments
+     aiSearch      // Ensure AI Search exists
+     storage       // Ensure Storage exists
+     cosmosDB
+     privateEndpointAndDNS
+     cosmosAccountRoleAssignments
+     storageAccountRoleAssignment
+     aiSearchRoleAssignments
   ]
 }
 
@@ -326,6 +344,7 @@ module cosmosContainerRoleAssignments 'modules-network-secured/cosmos-container-
 
   }
 dependsOn: [
-  addProjectCapabilityHost, storageContainersRoleAssignment
+  addProjectCapabilityHost
+  storageContainersRoleAssignment
   ]
 }
