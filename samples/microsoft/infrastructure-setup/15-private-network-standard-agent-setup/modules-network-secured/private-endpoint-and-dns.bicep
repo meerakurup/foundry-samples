@@ -38,6 +38,9 @@ param peSubnetName string
 @description('Suffix for unique resource names')
 param suffix string
 
+@description('Resource Group name for existing Virtual Network (if different from current resource group)')
+param vnetResourceGroupName string = resourceGroup().name
+
 // Reference existing services that need private endpoints
 resource aiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiAccountName
@@ -62,7 +65,7 @@ resource cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' exis
 // Reference existing network resources
 resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = {
   name: vnetName
-  scope: resourceGroup()
+  scope: resourceGroup(vnetResourceGroupName)
 }
 
 resource peSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = {
@@ -178,7 +181,7 @@ resource cosmosDBPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01'
 //         3) Create DNS Zone Group for Private Endpoint
 
 // Private DNS Zone for AI Services (Account)
-// 1) Enables custom DNS resolution for AI Services private endpoint  
+// 1) Enables custom DNS resolution for AI Services private endpoint
 
 resource aiServicesPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   name: 'privatelink.services.ai.azure.com'
@@ -259,7 +262,7 @@ resource aiServicesDnsGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGr
     ]
   }
   dependsOn: [
-    aiServicesLink 
+    aiServicesLink
     cognitiveServicesLink
     aiOpenAILink
   ]
