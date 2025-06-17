@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.35.1.17967",
-      "templateHash": "7604848766749675590"
+      "templateHash": "16772666508514628865"
     }
   },
   "parameters": {
@@ -107,7 +107,7 @@
     },
     "vnetName": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "agent-vnet-test",
       "metadata": {
         "description": "Virtual Network name for the Agent to create new or existing virtual network"
       }
@@ -131,6 +131,27 @@
       "defaultValue": "",
       "metadata": {
         "description": "Existing Virtual Network name Resource ID"
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/16",
+      "metadata": {
+        "description": "Address space for the VNet (only used for new VNet)"
+      }
+    },
+    "agentSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.0.0/24",
+      "metadata": {
+        "description": "Address prefix for the agent subnet"
+      }
+    },
+    "peSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "192.168.1.0/24",
+      "metadata": {
+        "description": "Address prefix for the private endpoint subnet"
       }
     },
     "aiSearchResourceId": {
@@ -183,6 +204,7 @@
     "azureStorageSubscriptionId": "[if(variables('storagePassedIn'), variables('storageParts')[2], subscription().subscriptionId)]",
     "azureStorageResourceGroupName": "[if(variables('storagePassedIn'), variables('storageParts')[4], resourceGroup().name)]",
     "vnetParts": "[split(parameters('existingVnetResourceId'), '/')]",
+    "vnetSubscriptionId": "[if(variables('existingVnetPassedIn'), variables('vnetParts')[2], subscription().subscriptionId)]",
     "vnetResourceGroupName": "[if(variables('existingVnetPassedIn'), variables('vnetParts')[4], resourceGroup().name)]",
     "existingVnetName": "[if(variables('existingVnetPassedIn'), last(variables('vnetParts')), parameters('vnetName'))]",
     "trimVnetName": "[trim(variables('existingVnetName'))]"
@@ -215,6 +237,18 @@
           },
           "peSubnetName": {
             "value": "[parameters('peSubnetName')]"
+          },
+          "vnetAddressPrefix": {
+            "value": "[parameters('vnetAddressPrefix')]"
+          },
+          "agentSubnetPrefix": {
+            "value": "[parameters('agentSubnetPrefix')]"
+          },
+          "peSubnetPrefix": {
+            "value": "[parameters('peSubnetPrefix')]"
+          },
+          "existingVnetSubscriptionId": {
+            "value": "[variables('vnetSubscriptionId')]"
           }
         },
         "template": {
@@ -224,7 +258,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.35.1.17967",
-              "templateHash": "4179713291512922799"
+              "templateHash": "1215625686658976772"
             }
           },
           "parameters": {
@@ -245,6 +279,13 @@
               "defaultValue": false,
               "metadata": {
                 "description": "Indicates if an existing VNet should be used"
+              }
+            },
+            "existingVnetSubscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Subscription ID of the existing VNet (if different from current subscription)"
               }
             },
             "existingVnetResourceGroupName": {
@@ -345,7 +386,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.35.1.17967",
-                      "templateHash": "11569057831277477506"
+                      "templateHash": "12314636783148432697"
                     }
                   },
                   "parameters": {
@@ -463,6 +504,10 @@
                     "virtualNetworkResourceGroup": {
                       "type": "string",
                       "value": "[resourceGroup().name]"
+                    },
+                    "virtualNetworkSubscriptionId": {
+                      "type": "string",
+                      "value": "[subscription().subscriptionId]"
                     }
                   }
                 }
@@ -484,6 +529,9 @@
                   },
                   "vnetResourceGroupName": {
                     "value": "[parameters('existingVnetResourceGroupName')]"
+                  },
+                  "vnetSubscriptionId": {
+                    "value": "[parameters('existingVnetSubscriptionId')]"
                   },
                   "agentSubnetName": {
                     "value": "[parameters('agentSubnetName')]"
@@ -511,7 +559,7 @@
                     "_generator": {
                       "name": "bicep",
                       "version": "0.35.1.17967",
-                      "templateHash": "974497936306929804"
+                      "templateHash": "6049695461564027591"
                     }
                   },
                   "parameters": {
@@ -519,6 +567,13 @@
                       "type": "string",
                       "metadata": {
                         "description": "The name of the existing virtual network"
+                      }
+                    },
+                    "vnetSubscriptionId": {
+                      "type": "string",
+                      "defaultValue": "[subscription().subscriptionId]",
+                      "metadata": {
+                        "description": "Subscription ID of virtual network (if different from current subscription)"
                       }
                     },
                     "vnetResourceGroupName": {
@@ -780,6 +835,10 @@
                     "virtualNetworkResourceGroup": {
                       "type": "string",
                       "value": "[parameters('vnetResourceGroupName')]"
+                    },
+                    "virtualNetworkSubscriptionId": {
+                      "type": "string",
+                      "value": "[parameters('vnetSubscriptionId')]"
                     }
                   }
                 }
@@ -794,6 +853,10 @@
             "virtualNetworkId": {
               "type": "string",
               "value": "[if(parameters('useExistingVnet'), reference(resourceId('Microsoft.Resources/deployments', 'existing-vnet-deployment'), '2022-09-01').outputs.virtualNetworkId.value, reference(resourceId('Microsoft.Resources/deployments', 'vnet-deployment'), '2022-09-01').outputs.virtualNetworkId.value)]"
+            },
+            "virtualNetworkSubscriptionId": {
+              "type": "string",
+              "value": "[if(parameters('useExistingVnet'), reference(resourceId('Microsoft.Resources/deployments', 'existing-vnet-deployment'), '2022-09-01').outputs.virtualNetworkSubscriptionId.value, reference(resourceId('Microsoft.Resources/deployments', 'vnet-deployment'), '2022-09-01').outputs.virtualNetworkSubscriptionId.value)]"
             },
             "virtualNetworkResourceGroup": {
               "type": "string",
@@ -1365,6 +1428,27 @@
           },
           "vnetResourceGroupName": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet-{0}-{1}-deployment', variables('trimVnetName'), variables('uniqueSuffix'))), '2022-09-01').outputs.virtualNetworkResourceGroup.value]"
+          },
+          "vnetSubscriptionId": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet-{0}-{1}-deployment', variables('trimVnetName'), variables('uniqueSuffix'))), '2022-09-01').outputs.virtualNetworkSubscriptionId.value]"
+          },
+          "cosmosDBSubscriptionId": {
+            "value": "[variables('cosmosDBSubscriptionId')]"
+          },
+          "cosmosDBResourceGroupName": {
+            "value": "[variables('cosmosDBResourceGroupName')]"
+          },
+          "aiSearchSubscriptionId": {
+            "value": "[variables('aiSearchServiceSubscriptionId')]"
+          },
+          "aiSearchResourceGroupName": {
+            "value": "[variables('aiSearchServiceResourceGroupName')]"
+          },
+          "storageAccountResourceGroupName": {
+            "value": "[variables('azureStorageResourceGroupName')]"
+          },
+          "storageAccountSubscriptionId": {
+            "value": "[variables('azureStorageSubscriptionId')]"
           }
         },
         "template": {
@@ -1374,7 +1458,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.35.1.17967",
-              "templateHash": "2071879279980605071"
+              "templateHash": "11309177889631350790"
             }
           },
           "parameters": {
@@ -1426,6 +1510,55 @@
               "metadata": {
                 "description": "Resource Group name for existing Virtual Network (if different from current resource group)"
               }
+            },
+            "vnetSubscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Subscription ID for Virtual Network"
+              }
+            },
+            "storageAccountResourceGroupName": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().name]",
+              "metadata": {
+                "description": "Resource Group name for Storage Account"
+              }
+            },
+            "storageAccountSubscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Subscription ID for Storage account"
+              }
+            },
+            "aiSearchSubscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Subscription ID for AI Search service"
+              }
+            },
+            "aiSearchResourceGroupName": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().name]",
+              "metadata": {
+                "description": "Resource Group name for AI Search service"
+              }
+            },
+            "cosmosDBSubscriptionId": {
+              "type": "string",
+              "defaultValue": "[subscription().subscriptionId]",
+              "metadata": {
+                "description": "Subscription ID for Cosmos DB account"
+              }
+            },
+            "cosmosDBResourceGroupName": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().name]",
+              "metadata": {
+                "description": "Resource group name for Cosmos DB account"
+              }
             }
           },
           "resources": [
@@ -1436,7 +1569,7 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "subnet": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
                 },
                 "privateLinkServiceConnections": [
                   {
@@ -1458,13 +1591,13 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "subnet": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
                 },
                 "privateLinkServiceConnections": [
                   {
                     "name": "[format('{0}-private-link-service-connection', parameters('aiSearchName'))]",
                     "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.Search/searchServices', parameters('aiSearchName'))]",
+                      "privateLinkServiceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('aiSearchSubscriptionId'), parameters('aiSearchResourceGroupName')), 'Microsoft.Search/searchServices', parameters('aiSearchName'))]",
                       "groupIds": [
                         "searchService"
                       ]
@@ -1480,13 +1613,13 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "subnet": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
                 },
                 "privateLinkServiceConnections": [
                   {
                     "name": "[format('{0}-private-link-service-connection', parameters('storageName'))]",
                     "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageName'))]",
+                      "privateLinkServiceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('storageAccountSubscriptionId'), parameters('storageAccountResourceGroupName')), 'Microsoft.Storage/storageAccounts', parameters('storageName'))]",
                       "groupIds": [
                         "blob"
                       ]
@@ -1502,13 +1635,13 @@
               "location": "[resourceGroup().location]",
               "properties": {
                 "subnet": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('peSubnetName'))]"
                 },
                 "privateLinkServiceConnections": [
                   {
                     "name": "[format('{0}-private-link-service-connection', parameters('cosmosDBName'))]",
                     "properties": {
-                      "privateLinkServiceId": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]",
+                      "privateLinkServiceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('cosmosDBSubscriptionId'), parameters('cosmosDBResourceGroupName')), 'Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName'))]",
                       "groupIds": [
                         "Sql"
                       ]
@@ -1542,7 +1675,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },
@@ -1557,7 +1690,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },
@@ -1572,7 +1705,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },
@@ -1629,7 +1762,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },
@@ -1669,7 +1802,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },
@@ -1709,7 +1842,7 @@
               "location": "global",
               "properties": {
                 "virtualNetwork": {
-                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+                  "id": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('vnetSubscriptionId'), parameters('vnetResourceGroupName')), 'Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
                 },
                 "registrationEnabled": false
               },

@@ -76,3 +76,4 @@ output peSubnetId string = '${virtualNetwork.id}/subnets/${peSubnetName}'
 output virtualNetworkName string = virtualNetwork.name
 output virtualNetworkId string = virtualNetwork.id
 output virtualNetworkResourceGroup string = resourceGroup().name
+output virtualNetworkSubscriptionId string = subscription().subscriptionId
