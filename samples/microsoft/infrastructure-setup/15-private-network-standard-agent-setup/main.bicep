@@ -219,6 +219,12 @@ module privateEndpointAndDNS 'modules-network-secured/private-endpoint-and-dns.b
       suffix: uniqueSuffix                                    // Unique identifier
       vnetResourceGroupName: vnet.outputs.virtualNetworkResourceGroup
       vnetSubscriptionId: vnet.outputs.virtualNetworkSubscriptionId // Subscription ID for the VNet
+      cosmosDBSubscriptionId: cosmosDBSubscriptionId // Subscription ID for Cosmos DB
+      cosmosDBResourceGroupName: cosmosDBResourceGroupName // Resource Group for Cosmos DB
+      aiSearchSubscriptionId: aiSearchServiceSubscriptionId // Subscription ID for AI Search Service
+      aiSearchResourceGroupName: aiSearchServiceResourceGroupName // Resource Group for AI Search Service
+      storageAccountResourceGroupName: azureStorageResourceGroupName // Resource Group for Storage Account
+      storageAccountSubscriptionId: azureStorageSubscriptionId // Subscription ID for Storage Account
     }
     dependsOn: [
     aiSearch      // Ensure AI Search exists

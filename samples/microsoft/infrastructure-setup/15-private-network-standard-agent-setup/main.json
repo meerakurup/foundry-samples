@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.35.1.17967",
-      "templateHash": "10008844254080744696"
+      "templateHash": "16772666508514628865"
     }
   },
   "parameters": {
@@ -1431,6 +1431,24 @@
           },
           "vnetSubscriptionId": {
             "value": "[reference(resourceId('Microsoft.Resources/deployments', format('vnet-{0}-{1}-deployment', variables('trimVnetName'), variables('uniqueSuffix'))), '2022-09-01').outputs.virtualNetworkSubscriptionId.value]"
+          },
+          "cosmosDBSubscriptionId": {
+            "value": "[variables('cosmosDBSubscriptionId')]"
+          },
+          "cosmosDBResourceGroupName": {
+            "value": "[variables('cosmosDBResourceGroupName')]"
+          },
+          "aiSearchSubscriptionId": {
+            "value": "[variables('aiSearchServiceSubscriptionId')]"
+          },
+          "aiSearchResourceGroupName": {
+            "value": "[variables('aiSearchServiceResourceGroupName')]"
+          },
+          "storageAccountResourceGroupName": {
+            "value": "[variables('azureStorageResourceGroupName')]"
+          },
+          "storageAccountSubscriptionId": {
+            "value": "[variables('azureStorageSubscriptionId')]"
           }
         },
         "template": {
@@ -1440,7 +1458,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.35.1.17967",
-              "templateHash": "7552927240513533174"
+              "templateHash": "11309177889631350790"
             }
           },
           "parameters": {
@@ -1507,7 +1525,7 @@
                 "description": "Resource Group name for Storage Account"
               }
             },
-            "storageSubscriptionId": {
+            "storageAccountSubscriptionId": {
               "type": "string",
               "defaultValue": "[subscription().subscriptionId]",
               "metadata": {
@@ -1601,7 +1619,7 @@
                   {
                     "name": "[format('{0}-private-link-service-connection', parameters('storageName'))]",
                     "properties": {
-                      "privateLinkServiceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('storageSubscriptionId'), parameters('storageAccountResourceGroupName')), 'Microsoft.Storage/storageAccounts', parameters('storageName'))]",
+                      "privateLinkServiceId": "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', parameters('storageAccountSubscriptionId'), parameters('storageAccountResourceGroupName')), 'Microsoft.Storage/storageAccounts', parameters('storageName'))]",
                       "groupIds": [
                         "blob"
                       ]

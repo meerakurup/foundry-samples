@@ -49,7 +49,7 @@ param vnetSubscriptionId string = subscription().subscriptionId
 param storageAccountResourceGroupName string = resourceGroup().name
 
 @description('Subscription ID for Storage account')
-param storageSubscriptionId string = subscription().subscriptionId
+param storageAccountSubscriptionId string = subscription().subscriptionId
 
 @description('Subscription ID for AI Search service')
 param aiSearchSubscriptionId string = subscription().subscriptionId
@@ -75,7 +75,7 @@ resource aiSearch 'Microsoft.Search/searchServices@2023-11-01' existing = {
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageName
-  scope: resourceGroup(storageSubscriptionId, storageAccountResourceGroupName)
+  scope: resourceGroup(storageAccountSubscriptionId, storageAccountResourceGroupName)
 }
 
 resource cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' existing = {
