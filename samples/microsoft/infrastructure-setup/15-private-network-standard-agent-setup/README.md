@@ -149,7 +149,7 @@ modules-network-secured/
 ├── format-project-workspace-id.bicep               # Formatting the project workspace ID
 ├── network-agent-vnet.bicep                        # Logic for routing virutal network set-up if existing virtual network is selected
 ├── private-endpoint-and-dns.bicep                  # Creating virtual networks and DNS zones. 
-├── standard-dependent-resources-bicep              # Deploying CosmosDB, Storage, and Search
+├── standard-dependent-resources.bicep              # Deploying CosmosDB, Storage, and Search
 ├── subnet.bicep                                    # Setting the subnet for Agent network injection
 ├── validate-existing-resources.bicep               # Validate existing CosmosDB, Storage, and Search to template deployment
 └── vnet.bicep                                      # Deploying a new virtual network
