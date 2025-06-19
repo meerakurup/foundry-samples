@@ -154,7 +154,7 @@ modules-network-secured/
 ├── validate-existing-resources.bicep               # Validate existing CosmosDB, Storage, and Search to template deployment
 └── vnet.bicep                                      # Deploying a new virtual network
 ```
-**Note:** If you bring your own VNET for this template, ensure the subnet for Agents has the correct subnet delegation to Microsoft.App/environments. If you have not specificed the delegated subnet, the template will complete this for you. 
+**Note:** If you bring your own VNET for this template, ensure the subnet for Agents has the correct subnet delegation to Microsoft.App/environments. If you have not specified the delegated subnet, the template will complete this for you. 
 
 ## Limitations
 - The capability host sub-resources of resource/Project must be deleted before deleting the resource/Project resource itself. You can use the script as sample to delete it or can be done in alternate ways via ARM. This restriction would be removed in next revision (coming soon).
