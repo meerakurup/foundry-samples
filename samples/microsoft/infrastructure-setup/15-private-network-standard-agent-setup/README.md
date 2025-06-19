@@ -159,7 +159,7 @@ modules-network-secured/
 ## Limitations
 - The capability host sub-resources of resource/Project must be deleted before deleting the resource/Project resource itself. You can use the script as sample to delete it or can be done in alternate ways via ARM. This restriction would be removed in next revision (coming soon).
     - [Run delete script](../utils/deleteCaphost.sh)
-- If you want to delete your Foundry resource and Standard Agent with secured network set-up from the Azure Portal, delete your AI Foundry resource and virtual network last. Before deleting the virutal network, ensure to delete and purge your AI Foundry resource. Navigate to __Manage deleted resources__, then select your subscription and the Foundry resource you would like to purge. 
+- If you want to delete your Foundry resource and Standard Agent with secured network set-up from the Azure Portal, delete your AI Foundry resource and virtual network last. Before deleting the virtual network, ensure to delete and purge your AI Foundry resource. Navigate to __Manage deleted resources__, then select your subscription and the Foundry resource you would like to purge. 
 
 ## Maintenance
 
